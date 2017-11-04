@@ -1,0 +1,54 @@
+--- telldus/telldus-core/common/Socket_unix.cpp
++++ telldus_patched/telldus-core/common/Socket_unix.cpp
+@@ -12,6 +12,8 @@
+ #include <fcntl.h>
+ #include <math.h>
+ #include <string>
++#include <sys/select.h>
++#include <unistd.h>
+ 
+ #include "common/Socket.h"
+ #include "common/Mutex.h"
+--- telldus/telldus-core/service/CMakeLists.txt
++++ telldus_patched/telldus-core/service/CMakeLists.txt
+@@ -184,7 +184,7 @@
+ 	LIST(APPEND telldus-service_SRCS TellStick_ftd2xx.cpp )
+ 	LIST(APPEND telldus-service_LIBRARIES ${FTD2XX_LIBRARY})
+ ELSE (FTDI_ENGINE STREQUAL "ftd2xx")
+-	FIND_LIBRARY(FTDI_LIBRARY ftdi)
++	FIND_LIBRARY(FTDI_LIBRARY ftdi1)
+ 	INCLUDE(FindPkgConfig)
+ 	PKG_SEARCH_MODULE(FTDI libftdi)
+ 	INCLUDE_DIRECTORIES( ${FTDI_INCLUDEDIR} )
+--- telldus/telldus-core/service/TellStick_libftdi.cpp
++++ telldus_patched/telldus-core/service/TellStick_libftdi.cpp
+@@ -4,7 +4,7 @@
+ // Copyright: See COPYING file that comes with this distribution
+ //
+ //
+-#include <ftdi.h>
++#include <libftdi1/ftdi.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+--- telldus/telldus-core/service/tellstick.conf
++++ telldus_patched/telldus-core/service/tellstick.conf
+@@ -1,4 +1,4 @@
+-user = "nobody"
++user = "root"
+ group = "plugdev"
+ ignoreControllerConfirmation = "false"
+ device {
+--- telldus/telldus-core/tdadmin/CMakeLists.txt
++++ telldus_patched/telldus-core/tdadmin/CMakeLists.txt
+@@ -38,8 +38,10 @@
+ 		${ARGP_LIBRARY}
+ 	)
+ ELSE (WIN32)
++	FIND_LIBRARY(ARGP_LIBRARY argp)
+ 	TARGET_LINK_LIBRARIES(tdadmin
+ 		${CMAKE_BINARY_DIR}/client/libtelldus-core.so
++		${ARGP_LIBRARY}
+ 	)
+ ENDIF (WIN32)
+ 
